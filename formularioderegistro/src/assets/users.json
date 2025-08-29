@@ -1,0 +1,17 @@
+[
+  {
+    "nombre": "Ana",
+    "apellido": "López",
+    "fechaNacimiento": "1995-04-12"
+  },
+  {
+    "nombre": "Bruno",
+    "apellido": "García",
+    "fechaNacimiento": "1988-11-30"
+  },
+  {
+    "nombre": "Carla",
+    "apellido": "Méndez",
+    "fechaNacimiento": "2001-07-05"
+  }
+]
