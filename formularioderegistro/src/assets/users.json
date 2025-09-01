@@ -1,17 +1,5 @@
 [
-  {
-    "nombre": "Ana",
-    "apellido": "López",
-    "fechaNacimiento": "1995-04-12"
-  },
-  {
-    "nombre": "Bruno",
-    "apellido": "García",
-    "fechaNacimiento": "1988-11-30"
-  },
-  {
-    "nombre": "Carla",
-    "apellido": "Méndez",
-    "fechaNacimiento": "2001-07-05"
-  }
+  { "nombre": "Esteban Pérez", "email": "eperez@unab.com", "edad": 34 },
+  { "nombre": "Isabel Palacios", "email": "ipalacios@unab.com", "edad": 36 },
+  { "nombre": "Valentina Troncoso", "email": "vtroncoso@gmail.com", "edad": 28 }
 ]

@@ -2,8 +2,8 @@
   <div class="container py-4">
     <header class="mb-4">
       <h1 class="text-white display-6">Formulario de Inscripción</h1>
-      <p class="text-white mb-0">
-     Base de datos inscritos en Formulario
+      <p class="text-white d mb-0">
+       Usuarios Inscritos 
       </p>
     </header>
 
@@ -12,10 +12,10 @@
         <UserForm @add-user="addUser" />
         <div class="d-flex gap-2 mt-3">
           <button class="btn btn-outline-secondary btn-sm" @click="recargarDesdeJSON">
-            Restaurar usuarios base
+            Restaurar 
           </button>
           <button class="btn btn-outline-danger btn-sm" @click="limpiarTodo">
-            Limpiar todo
+            Borrar todo
           </button>
         </div>
       </div>
@@ -23,7 +23,7 @@
 
     <section class="card shadow-sm">
       <div class="card-header bg-light">
-        <strong>Usuarios Inscritos ({{ users.length }})</strong>
+        <strong>Usuarios ({{ users.length }})</strong>
       </div>
       <div class="card-body">
         <UserTable :users="users" />
@@ -36,50 +36,76 @@
 import { ref, onMounted, watch } from 'vue';
 import UserForm from './components/UserForm.vue';
 import UserTable from './components/UserTable.vue';
-import baseUsers from './assets/users.json';
 
-const LS_KEY = 'vue-users-demo';
+const LS_KEY = 'vue-users-demo-v2';
 const users = ref([]);
 
-function inicializar() {
+/** Intenta: 1) localStorage, 2) dynamic import (src/assets/users.json), 3) fetch(/users.json) */
+async function inicializar() {
+  // 1) localStorage
   try {
     const raw = localStorage.getItem(LS_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
-      users.value = Array.isArray(parsed) ? parsed : [];
-      if (!users.value.length) {
-        users.value = [...baseUsers];
-        guardar();
+      if (Array.isArray(parsed) && parsed.length) {
+        users.value = parsed;
+        return;
       }
-    } else {
-      users.value = [...baseUsers];
-      guardar();
     }
-  } catch {
-    users.value = [...baseUsers];
-    guardar();
+  } catch (_) {
+    // ignore
   }
+
+  // 2) dynamic import del JSON en src/assets
+  try {
+    const mod = await import('./assets/users.json');
+    const baseUsers = (mod?.default ?? mod);
+    if (Array.isArray(baseUsers) && baseUsers.length) {
+      users.value = baseUsers;
+      guardar();
+      return;
+    }
+  } catch (_) {
+    // puede fallar si la ruta no existe
+  }
+
+  // 3) fetch desde /public/users.json (coloca una copia allí si quieres este fallback)
+  try {
+    const res = await fetch('/users.json');
+    if (res.ok) {
+      const baseUsers = await res.json();
+      if (Array.isArray(baseUsers) && baseUsers.length) {
+        users.value = baseUsers;
+        guardar();
+        return;
+      }
+    }
+  } catch (_) {
+    // ignore
+  }
+
+  // si todo falla, deja vacío
+  users.value = [];
+  guardar();
 }
 
 function guardar() {
   localStorage.setItem(LS_KEY, JSON.stringify(users.value));
 }
 
-
 function addUser(user) {
-
-  const fechaStr = String(user.fechaNacimiento).slice(0, 10);
   users.value.unshift({
     nombre: (user.nombre || '').trim(),
-    apellido: (user.apellido || '').trim(),
-    fechaNacimiento: fechaStr,
+    email: (user.email || '').trim(),
+    edad: Number(user.edad) || 0,
   });
   guardar();
 }
 
-function recargarDesdeJSON() {
-  users.value = [...baseUsers];
-  guardar();
+async function recargarDesdeJSON() {
+  // borra storage y reintenta inicialización
+  localStorage.removeItem(LS_KEY);
+  await inicializar();
 }
 
 function limpiarTodo() {
@@ -92,7 +118,5 @@ watch(users, guardar, { deep: true });
 </script>
 
 <style>
-body {
-  background: #04534a;
-}
+body { background: #04534a; }
 </style>

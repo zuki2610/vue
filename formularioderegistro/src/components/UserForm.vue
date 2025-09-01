@@ -1,51 +1,57 @@
 <template>
   <form class="row g-3 align-items-end" @submit.prevent="handleSubmit">
     <div class="col-md-3">
-      <label class="form-label">Nombre</label>
+      <label class="form-label">Nombre y Apellido</label>
       <input
         v-model.trim="nombre"
         type="text"
         class="form-control"
-        placeholder="Ej: Miguel"
+        placeholder="Ej: Miguel Rondanelli"
         required
       />
     </div>
 
     <div class="col-md-3">
-      <label class="form-label">Apellido</label>
+      <label class="form-label">Correo electrónico</label>
       <input
-        v-model.trim="apellido"
-        type="text"
+        v-model.trim="email"
+        type="email"
         class="form-control"
-        placeholder="Ej: Rondanelli"
+        placeholder="ejemplo@correo.com"
         required
       />
     </div>
 
     <div class="col-md-2">
-      <label class="form-label">Fecha de Nacimiento</label>
-      <div class="position-relative">
-        <input
-          v-model="fechaNacimiento"
-          type="date"
-          class="form-control"
-          required
-        />
-        <div
-          class="form-text position-absolute w-100"
-          v-if="fechaNacimiento"
-          style="top: 100%; left: 0;"
-        >
-          Edad estimada: <strong>{{ edadPreview }}</strong>
-        </div>
-      </div>
+      <label class="form-label">Edad</label>
+      <input
+        v-model.number="edad"
+        type="number"
+        min="0"
+        max="120"
+        class="form-control"
+        placeholder="Ej: 30"
+        required
+      />
     </div>
 
-  
-    <div class="col-md-2 d-grid">
-      <button class="btn btn-primary" type="submit">
-        Agregar usuario
+    <div class="col-md-2 d-grid gap-2 d-md-block">
+      <button class="btn btn-primary w-100" type="submit">Agregar</button>
+      <button class="btn btn-outline-secondary w-100 mt-2" type="button" @click="limpiarFormulario">
+        Limpiar formulario
       </button>
+    </div>
+
+    <!-- Resumen: solo visible cuando todos los campos están completos -->
+    <div class="col-12">
+      <div class="alert alert-info mt-2" v-if="isComplete">
+        <h6 class="mb-2">Resumen de datos</h6>
+        <ul class="mb-0">
+          <li><strong>Nombre:</strong> {{ nombre }}</li>
+          <li><strong>Correo:</strong> {{ email }}</li>
+          <li><strong>Edad:</strong> {{ edad }}</li>
+        </ul>
+      </div>
     </div>
   </form>
 </template>
@@ -56,40 +62,26 @@ import { computed, ref } from 'vue';
 const emit = defineEmits(['add-user']);
 
 const nombre = ref('');
-const apellido = ref('');
-const fechaNacimiento = ref('');
+const email = ref('');
+const edad = ref(null);
 
-function parseLocalDate(yyyyMmDd) {
-  if (!yyyyMmDd) return null;
-  const [y, m, d] = yyyyMmDd.split('-').map(Number);
-  return new Date(y, (m ?? 1) - 1, d ?? 1);
-}
-
-function calcularEdadFromLocal(yyyyMmDd) {
-  const dob = parseLocalDate(yyyyMmDd);
-  if (!dob) return '-';
-  const today = new Date();
-  let age = today.getFullYear() - dob.getFullYear();
-  const m = today.getMonth() - dob.getMonth();
-  if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
-  return age;
-}
-
-const edadPreview = computed(() =>
-  fechaNacimiento.value ? calcularEdadFromLocal(fechaNacimiento.value) : '-'
+const isComplete = computed(() =>
+  !!nombre.value && !!email.value && Number.isFinite(edad.value)
 );
 
 function handleSubmit() {
-  if (!nombre.value || !apellido.value || !fechaNacimiento.value) return;
-
+  if (!isComplete.value) return;
   emit('add-user', {
     nombre: nombre.value,
-    apellido: apellido.value,
-    fechaNacimiento: fechaNacimiento.value,
+    email: email.value,
+    edad: edad.value
   });
+  limpiarFormulario();
+}
 
+function limpiarFormulario() {
   nombre.value = '';
-  apellido.value = '';
-  fechaNacimiento.value = '';
+  email.value = '';
+  edad.value = null;
 }
 </script>
