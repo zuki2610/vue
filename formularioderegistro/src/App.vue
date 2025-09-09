@@ -7,6 +7,13 @@
       </p>
     </header>
 
+
+    <section class="card shadow-sm mb-4">
+      <div class="card-body">
+        <FormControls />
+      </div>
+    </section>
+
     <section class="card shadow-sm mb-4">
       <div class="card-body">
         <UserForm @add-user="addUser" />
@@ -36,11 +43,11 @@
 import { ref, onMounted, watch } from 'vue';
 import UserForm from './components/UserForm.vue';
 import UserTable from './components/UserTable.vue';
+import FormControls from './components/FormControls.vue';
 
 const LS_KEY = 'vue-users-demo-v2';
 const users = ref([]);
 
-/** Intenta: 1) localStorage, 2) dynamic import (src/assets/users.json), 3) fetch(/users.json) */
 async function inicializar() {
   // 1) localStorage
   try {
@@ -53,10 +60,10 @@ async function inicializar() {
       }
     }
   } catch (_) {
-    // ignore
+  
   }
 
-  // 2) dynamic import del JSON en src/assets
+ 
   try {
     const mod = await import('./assets/users.json');
     const baseUsers = (mod?.default ?? mod);
@@ -66,10 +73,10 @@ async function inicializar() {
       return;
     }
   } catch (_) {
-    // puede fallar si la ruta no existe
+    
   }
 
-  // 3) fetch desde /public/users.json (coloca una copia allí si quieres este fallback)
+ 
   try {
     const res = await fetch('/users.json');
     if (res.ok) {
@@ -81,10 +88,10 @@ async function inicializar() {
       }
     }
   } catch (_) {
-    // ignore
+ 
   }
 
-  // si todo falla, deja vacío
+ 
   users.value = [];
   guardar();
 }
@@ -103,7 +110,7 @@ function addUser(user) {
 }
 
 async function recargarDesdeJSON() {
-  // borra storage y reintenta inicialización
+
   localStorage.removeItem(LS_KEY);
   await inicializar();
 }
